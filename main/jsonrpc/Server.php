@@ -48,7 +48,7 @@ class Server {
         if (!self::isValidRequestType()) {
             self::sendResponse(self::getResponseObject(null,
                     self::getErrorObject(self::INVALID_REQUEST_TYPE_CODE, null,
-                            print_r($_SERVER, true))));//'Invalid HTTP-method or Content-Type of the request')));
+                            'Invalid HTTP-method or Content-Type of the request')));
             return false;
         }
         
