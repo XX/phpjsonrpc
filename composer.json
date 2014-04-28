@@ -1,0 +1,23 @@
+{
+  "name": "phpjsonrpc",
+  "type": "library",
+  "description": "A PHP implementation of the JSON-RPC 2.0 specification.",
+  "version": "1.0.0",
+  
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.*"
+  },
+  
+  "autoload": {
+    "psr-0": {
+      "": [
+        "main/",
+        "test/"
+      ]
+    }
+  },
+  "minimum-stability": "stable"
+}
