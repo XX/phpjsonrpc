@@ -1,5 +1,5 @@
 {
-  "name": "phpjsonrpc",
+  "name": "neogen/phpjsonrpc",
   "type": "library",
   "description": "A PHP implementation of the JSON-RPC 2.0 specification.",
   "version": "1.0.0",
