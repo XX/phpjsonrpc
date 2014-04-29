@@ -10,4 +10,8 @@ class TestObject {
         return $minuend - $subtrahend;
     }
     
+    public function hello() {
+        return 'hello';
+    }
+    
 }

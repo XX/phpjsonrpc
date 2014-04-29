@@ -33,6 +33,11 @@ class ServerTest extends PHPUnit_Framework_TestCase {
             'request' => '{"jsonrpc": "2.0", "method": "echoMethod", "params": [false], "id": 1}',
             'response' => '{"jsonrpc": "2.0", "result": false, "id": 1}'
         ],
+        // omitted params
+        [
+            'request' => '{"jsonrpc": "2.0", "method": "hello", "id": 1}',
+            'response' => '{"jsonrpc": "2.0", "result": "hello", "id": 1}'
+        ],
         /*
         [
             'request' => '',

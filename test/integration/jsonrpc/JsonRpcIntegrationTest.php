@@ -21,6 +21,9 @@ class JsonRpcIntegrationTest extends PHPUnit_Framework_TestCase {
         
         $result = $this->testPort->subtract(3, 3);
         $this->assertEquals(0, $result);
+        
+        $result = $this->testPort->hello();
+        $this->assertEquals('hello', $result);
     }
     
 }
