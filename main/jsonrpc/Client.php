@@ -1,5 +1,7 @@
 <?php namespace jsonrpc;
 
+use Exception;
+
 /**
  * Class for a generic JSON-RPC 2.0 clients
  * http://www.jsonrpc.org/specification
@@ -134,6 +136,12 @@ class Client {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+
+        // Disable verify SSL cert
+        // http://unitstep.net/blog/2009/05/05/using-curl-in-php-to-access-https-ssltls-protected-sites/
+        // http://blog.yousoft.ru/2010/03/26/ispolzuem-curl-php-chast-3-protokol-https-ssl-soedinenie/
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
         if ($this->username && $this->password) {
             curl_setopt($ch, CURLOPT_USERPWD, $this->username.':'.$this->password);

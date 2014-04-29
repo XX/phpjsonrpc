@@ -166,7 +166,11 @@ class Server {
      */
     private static function isValidRequestType() {
         return (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST' &&
-                filter_input(INPUT_SERVER, 'HTTP_CONTENT_TYPE') === 'application/json');
+                (filter_input(INPUT_SERVER, 'CONTENT_TYPE') === 'application/json' ||
+                // Content-Type header value should be stored in CONTENT_TYPE, but the
+                // built-in web server stores it in HTTP_CONTENT_TYPE and does not create
+                // a CONTENT_TYPE key: https://bugs.php.net/bug.php?id=66606
+                filter_input(INPUT_SERVER, 'HTTP_CONTENT_TYPE') === 'application/json'));
     }
     
     /**
