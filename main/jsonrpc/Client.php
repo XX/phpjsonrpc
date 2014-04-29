@@ -28,6 +28,10 @@ class Client {
     private $timeout;
     
     private $debug;
+    
+    private $username;
+    
+    private $password;
 
     private $headers = [
         'Connection: close',
@@ -57,6 +61,17 @@ class Client {
      */
     public function __call($method, $params) {
         return $this->execute($method, $params);
+    }
+    
+    /**
+     * Set username and password
+     * 
+     * @param string $username
+     * @param string $password
+     */
+    public function authentication($username, $password) {
+        $this->username = $username;
+        $this->password = $password;
     }
 
     /**
@@ -88,8 +103,13 @@ class Client {
         
         if (isset($response['id']) && $response['id'] == $id && array_key_exists('result', $response)) {
             return $response['result'];
-        } else if ($this->debug && isset($response['error'])) {
-            print_r($response['error']);
+        } else if (isset($response['error'])) {
+            $error = $response['error'];
+            if ($this->debug) {
+                print_r($error);
+            }
+            $data = isset($error['data']) ? $error['data'] : '';
+            throw new Exception('JSON-RPC Error: [' . $error['message'] . '] ' . $data);
         }
 
         return null;
@@ -115,6 +135,10 @@ class Client {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
 
+        if ($this->username && $this->password) {
+            curl_setopt($ch, CURLOPT_USERPWD, $this->username.':'.$this->password);
+        }
+        
         $result = curl_exec($ch);
         $response = json_decode($result, true);
 
