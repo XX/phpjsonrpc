@@ -103,7 +103,9 @@ class Client {
 
         $response = $this->doRequest($request);
         
-        if (isset($response['id']) && $response['id'] == $id && array_key_exists('result', $response)) {
+        if (empty($response)) {
+            throw new Exception('JSON-RPC Error: response is empty');
+        } else if (isset($response['id']) && $response['id'] == $id && array_key_exists('result', $response)) {
             return $response['result'];
         } else if (isset($response['error'])) {
             $error = $response['error'];
@@ -112,6 +114,8 @@ class Client {
             }
             $data = isset($error['data']) ? $error['data'] : '';
             throw new Exception('JSON-RPC Error: [' . $error['message'] . '] ' . $data);
+        } else {
+            throw new Exception('JSON-RPC Error: response have unknown format, response = ' . print_r($response));
         }
 
         return null;
