@@ -11,6 +11,8 @@ use Exception;
 class Client {
     
     const JSON_RPC_VERSION = '2.0';
+    
+    const EXCEPTION_PREFIXE = 'JSON-RPC Error:';
 
     /**
      * The server URL
@@ -104,7 +106,7 @@ class Client {
         $response = $this->doRequest($request);
         
         if (empty($response)) {
-            throw new Exception('JSON-RPC Error: response is empty');
+            throw new Exception(self::EXCEPTION_PREFIXE . ' response is empty');
         } else if (isset($response['id']) && $response['id'] == $id && array_key_exists('result', $response)) {
             return $response['result'];
         } else if (isset($response['error'])) {
@@ -113,9 +115,10 @@ class Client {
                 print_r($error);
             }
             $data = isset($error['data']) ? $error['data'] : '';
-            throw new Exception('JSON-RPC Error: [' . $error['message'] . '] ' . $data);
+            throw new Exception(self::EXCEPTION_PREFIXE . ' [' . $error['message'] . '] ' . $data);
         } else {
-            throw new Exception('JSON-RPC Error: response have unknown format, response = ' . print_r($response));
+            throw new Exception(self::EXCEPTION_PREFIXE . ' response have unknown format, response = ' .
+                    print_r($response, true));
         }
 
         return null;
@@ -152,7 +155,14 @@ class Client {
         }
         
         $result = curl_exec($ch);
+        if ($result === false) {
+            throw new Exception(self::EXCEPTION_PREFIXE . ' curl error. ' . curl_error($ch));
+        }
+        
         $response = json_decode($result, true);
+        if ($response === null) {
+            throw new Exception(self::EXCEPTION_PREFIXE . ' response json cannot be decoded. ' . json_last_error_msg());
+        }
 
         curl_close($ch);
 
