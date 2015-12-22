@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Это главный файл для инициализации системы и обработки запросов
+ * Application starter
  */
 error_reporting(E_ALL);
 
