@@ -27,7 +27,7 @@ class Client {
      *
      * @var mixin
      */
-    public $id = false;
+    private $id = false;
 
     private $timeout;
     
