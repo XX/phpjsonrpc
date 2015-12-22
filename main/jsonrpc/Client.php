@@ -3,7 +3,7 @@
 use Exception;
 
 /**
- * Class for a generic JSON-RPC 2.0 clients
+ * Class for generic JSON-RPC 2.0 clients
  * http://www.jsonrpc.org/specification
  *
  * @author xx <freecoder.xx@gmail.com>
@@ -44,7 +44,7 @@ class Client {
     ];
 
     /**
-     * Takes the connection parameters
+     * Take the connection parameters
      *
      * @param string $url
      * @param boolean $debug
@@ -93,7 +93,7 @@ class Client {
             throw new Exception('Method name has no scalar value');
         }
 
-        // Prepares the request
+        // Prepare the request
         $request = [
             'jsonrpc' => self::JSON_RPC_VERSION,
             'method' => $method,
@@ -125,7 +125,7 @@ class Client {
     }
     
     /**
-     * Performs a jsonRCP request and gets the results as an array
+     * Perform jsonRCP request and get the results as an array
      * 
      * @param array $request
      * 

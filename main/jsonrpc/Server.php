@@ -13,7 +13,7 @@ class Server {
     
     const JSON_RPC_VERSION = '2.0';
     
-    /** Error codes for pre-defined errors */
+    /** Error codes for predefined errors */
     const PARSE_ERROR_CODE = -32700;
     const INVALID_REQUEST_CODE = -32600;
     const METHOD_NOT_FOUND_CODE = -32601;
@@ -184,7 +184,7 @@ class Server {
     /**
      * Validate JSON-RCP request type
      * 
-     * @return boolean - true if a request type is valid, false otherwise
+     * @return boolean - true if request type is valid, false otherwise
      */
     protected static function isValidRequestType() {
         return (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST' &&
@@ -218,7 +218,7 @@ class Server {
      * Sending the response object or not for a notification
      * 
      * @param array $responseObject - response object
-     * @param bool $batchMode - true if a response object ....
+     * @param bool $batchMode - true for batch mode
      */
     protected static function sendResponse($responseObject, $batchMode = false) {
         if (!empty($responseObject)) {
@@ -235,15 +235,15 @@ class Server {
             header('Content-Type: application/json');
             echo $response;
         } else {
-            // Notifications don't want response!
+            // Notifications don't need a response!
         }
     }
     
     /**
-     * Gives the response
+     * Give the response
      * 
      * @param mixin $result - result value of the method invoked on the Server or null, if there
-     * was an error invoking the method
+     * was an error while invoking the method
      * @param array $error - error object or null, if there was no error triggered during invocation
      * @param int $id - a context identifier, established by Client, or null, if there was an
      * error in detecting the id in the Request object (e.g. Parse error/Invalid Request)
@@ -261,7 +261,7 @@ class Server {
             $response['id'] = $id;
             return $response;
         } else {
-            // Notifications don't want response!
+            // Notifications don't need a response!
             return null;
         }
     }
@@ -270,8 +270,8 @@ class Server {
      * Forming error object by error code.
      * 
      * @param int $code - error code
-     * @param string $message - error message (for the pre-defined errors must not be specified)
-     * @param string $data - error data (must not be specified)
+     * @param string $message - error message (may not be specified for the predefined errors)
+     * @param string $data - error data (may not be specified)
      * 
      * @return array - error data
      */
