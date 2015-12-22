@@ -13,7 +13,7 @@ class Server {
     
     const JSON_RPC_VERSION = '2.0';
     
-    /** Error codes for pre-defined errors */
+    /** Error codes for predefined errors */
     const PARSE_ERROR_CODE = -32700;
     const INVALID_REQUEST_CODE = -32600;
     const METHOD_NOT_FOUND_CODE = -32601;
@@ -45,9 +45,9 @@ class Server {
     public static function handle($handler) {
         
         // Check request type
-        if (!self::isValidRequestType()) {
-            self::sendResponse(self::getResponseObject(null,
-                    self::getErrorObject(self::INVALID_REQUEST_TYPE_CODE, null,
+        if (!static::isValidRequestType()) {
+            static::sendResponse(static::getResponseObject(null,
+                    static::getErrorObject(self::INVALID_REQUEST_TYPE_CODE, null,
                             'Invalid HTTP-method or Content-Type of the request')));
             return false;
         }
@@ -57,19 +57,23 @@ class Server {
         
         // Check JSON format
         if (!is_array($request)) {
-            self::sendResponse(self::getResponseObject(null,
-                    self::getErrorObject(self::PARSE_ERROR_CODE, null, json_last_error_msg())));
+            static::sendResponse(
+                static::getResponseObject(
+                    null,
+                    static::getErrorObject(self::PARSE_ERROR_CODE, null, json_last_error_msg())
+                )
+            );
             return true;
         }
 
         // Handle batch request
-        if (self::isJsonArray($request)) {
-            $responseObject = self::executeBatch($handler, $request);
+        if (static::isJsonArray($request)) {
+            $responseObject = static::executeBatch($handler, $request);
         } else {
-            $responseObject = self::execute($handler, $request);
+            $responseObject = static::execute($handler, $request);
         }
         
-        self::sendResponse($responseObject);
+        static::sendResponse($responseObject);
         return true;
     }
     
@@ -83,8 +87,8 @@ class Server {
      */
     public static function execute($handler, $requestObject) {
         // Check JSON-RPC format
-        if (!self::checkJsonRpcFormat($requestObject)) {
-            return self::getResponseObject(null, self::getErrorObject(self::INVALID_REQUEST_CODE));
+        if (!static::checkJsonRpcFormat($requestObject)) {
+            return static::getResponseObject(null, static::getErrorObject(self::INVALID_REQUEST_CODE));
         }
         
         $id = isset($requestObject['id']) ? $requestObject['id'] : null;
@@ -100,32 +104,50 @@ class Server {
                         $methodParams = $reflection->getParameters();
 
                         if (!self::mapParameters($requestObject['params'], $methodParams, $params)) {
-                            return self::getResponseObject(null,
-                                    self::getErrorObject(self::INVALID_PARAMS_CODE), $id);
+                            return static::getResponseObject(
+                                    null,
+                                    static::getErrorObject(self::INVALID_PARAMS_CODE),
+                                    $id
+                            );
                         }
                     }
 
                     //$result = $reflection->invokeArgs($params);
                     $result = call_user_func_array(array($handler, $requestMethod), $params);
-                    return self::getResponseObject($result, null, $id);
+                    return static::getResponseObject($result, null, $id);
                 }
             }
-            return self::getResponseObject(null, self::getErrorObject(self::METHOD_NOT_FOUND_CODE), $id);
+            return static::getResponseObject(
+                    null,
+                    static::getErrorObject(self::METHOD_NOT_FOUND_CODE),
+                    $id
+            );
         } catch (Exception $e) {
-            return self::getResponseObject(null,
-                    self::getErrorObject(self::SERVER_ERROR_CODE, null, $e->getMessage()), $id);
+            return static::getResponseObject(
+                    null,
+                    static::getErrorObject(self::SERVER_ERROR_CODE, null, $e->getMessage()),
+                    $id
+            );
         }
     }
     
+    /**
+     * Execute batch method
+     * 
+     * @param object $handler
+     * @param array $requestObject
+     * 
+     * @return array - response objects array
+     */
     public static function executeBatch($handler, $requestObject) {
         $responses = array();
         
         foreach ($requestObject as $requestItem) {
             if (!is_array($requestItem)) {
-                $responses[] = self::getResponseObject(null,
-                        self::getErrorObject(self::INVALID_REQUEST_CODE));
+                $responses[] = static::getResponseObject(null,
+                        static::getErrorObject(self::INVALID_REQUEST_CODE));
             } else {
-                $responseObject = self::execute($handler, $requestItem);
+                $responseObject = static::execute($handler, $requestItem);
                 empty($responseObject) ? null : $responses[] = $responseObject;
             }
         }
@@ -135,7 +157,7 @@ class Server {
     
     private static function mapParameters($requestParams, array $methodParams, array &$params) {
         // Positional parameters
-        if (self::isJsonArray($requestParams)) {
+        if (static::isJsonArray($requestParams)) {
             if (count($requestParams) !== count($methodParams)) {
                 return false;
             }
@@ -162,9 +184,9 @@ class Server {
     /**
      * Validate JSON-RCP request type
      * 
-     * @return boolean - true if a request type is valid, false otherwise
+     * @return boolean - true if request type is valid, false otherwise
      */
-    private static function isValidRequestType() {
+    protected static function isValidRequestType() {
         return (filter_input(INPUT_SERVER, 'REQUEST_METHOD') === 'POST' &&
                 (filter_input(INPUT_SERVER, 'CONTENT_TYPE') === 'application/json' ||
                 // Content-Type header value should be stored in CONTENT_TYPE, but the
@@ -178,15 +200,17 @@ class Server {
      * 
      * @return boolean - true if a request object have JSON-RPC format, false otherwise
      */
-    private static function checkJsonRpcFormat($requestObject) {
-        return (isset($requestObject['jsonrpc']) &&
-                isset($requestObject['method']) &&
-                is_string($requestObject['method']) &&
-                $requestObject['jsonrpc'] === self::JSON_RPC_VERSION &&
-                (!isset($requestObject['params']) || is_array($requestObject['params'])));
+    protected static function checkJsonRpcFormat($requestObject) {
+        return (
+            isset($requestObject['jsonrpc']) &&
+            isset($requestObject['method']) &&
+            is_string($requestObject['method']) &&
+            $requestObject['jsonrpc'] === self::JSON_RPC_VERSION &&
+            ( !isset($requestObject['params']) || is_array($requestObject['params']))
+        );
     }
     
-    private static function isJsonArray($var) {
+    protected static function isJsonArray($var) {
         return (array_keys($var) === range(0, count($var) - 1));
     }
 
@@ -194,9 +218,9 @@ class Server {
      * Sending the response object or not for a notification
      * 
      * @param array $responseObject - response object
-     * @param bool $batchMode - true if a response object ....
+     * @param bool $batchMode - true for batch mode
      */
-    private static function sendResponse($responseObject, $batchMode = false) {
+    protected static function sendResponse($responseObject, $batchMode = false) {
         if (!empty($responseObject)) {
             if ($batchMode) {
                 $response = '[' . implode(',',
@@ -211,22 +235,22 @@ class Server {
             header('Content-Type: application/json');
             echo $response;
         } else {
-            // Notifications don't want response!
+            // Notifications don't need a response!
         }
     }
     
     /**
-     * Gives the response
+     * Give the response
      * 
      * @param mixin $result - result value of the method invoked on the Server or null, if there
-     * was an error invoking the method
+     * was an error while invoking the method
      * @param array $error - error object or null, if there was no error triggered during invocation
      * @param int $id - a context identifier, established by Client, or null, if there was an
      * error in detecting the id in the Request object (e.g. Parse error/Invalid Request)
      * 
      * @return array - response object or null for a notification
      */
-    private static function getResponseObject($result = null, $error = null, $id = null) {
+    protected static function getResponseObject($result = null, $error = null, $id = null) {
         if (!empty($id) || !empty($error)) {
             $response = [
                 'jsonrpc' => self::JSON_RPC_VERSION
@@ -237,7 +261,7 @@ class Server {
             $response['id'] = $id;
             return $response;
         } else {
-            // Notifications don't want response!
+            // Notifications don't need a response!
             return null;
         }
     }
@@ -246,12 +270,12 @@ class Server {
      * Forming error object by error code.
      * 
      * @param int $code - error code
-     * @param string $message - error message (for the pre-defined errors must not be specified)
-     * @param string $data - error data (must not be specified)
+     * @param string $message - error message (may not be specified for the predefined errors)
+     * @param string $data - error data (may not be specified)
      * 
      * @return array - error data
      */
-    private static function getErrorObject($code, $message = null, $data = null) {
+    protected static function getErrorObject($code, $message = null, $data = null) {
         if (empty($message)) {
             $key = array_key_exists($code, self::$errorMessages) ? $code : self::SERVER_ERROR_CODE;
             $message = self::$errorMessages[$key];
